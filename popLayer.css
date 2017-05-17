@@ -1,0 +1,45 @@
+html{
+	overflow: hidden !important;
+}
+
+.layer-frame{
+	border:2px solid #ddd;
+	visibility: hidden;
+	position: absolute;
+	overflow: auto;
+	cursor: default;
+	min-height: 300px;
+}
+
+.layer-frame-title{
+	height:40px;
+	border-bottom: 1px solid #ddd;
+	position: relative;
+	line-height: 40px;
+	padding-left: 15px;
+	
+	/*标题栏的文本禁止被选中，一个是为了美观，更重要的是解决拖动选中文字后弹出层吸附在鼠标上的bug*/
+	/*IE 6 - IE9 不支持user-select，这部分用JavaScript代码解决*/
+	-webkit-user-select: none;  /* Chrome / Safari */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;      
+}
+
+.layer-frame-title-btn{
+	background: transparent;
+	border:none;
+	outline: none;
+	cursor: pointer;
+	font-size: 23px;
+	padding: 0;
+	color:#BFBFBF;
+	position: absolute;
+	right: 10px;
+	top:0;
+	height: 100%;
+}
+
+.layer-frame-title-btn:hover{
+	color:#2E2E2E;
+}
