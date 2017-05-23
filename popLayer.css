@@ -13,10 +13,13 @@ html{
 
 .layer-frame-title{
 	height:40px;
+	line-height: 40px;
 	border-bottom: 1px solid #ddd;
 	position: relative;
-	line-height: 40px;
-	padding-left: 15px;
+	top: 0;
+	width: 100%;
+	/* padding-left: 15px;
+	box-sizing: border-box; */ /*开启怪异模式,IE8及之前不支持box-sizing，这里不用*/
 	
 	/*标题栏的文本禁止被选中，一个是为了美观，更重要的是解决拖动选中文字后弹出层吸附在鼠标上的bug*/
 	/*IE 6 - IE9 不支持user-select，这部分用JavaScript代码解决*/
@@ -24,6 +27,10 @@ html{
     -moz-user-select: none;     /* Firefox */
     -ms-user-select: none;      /* IE 10+ */
     user-select: none;      
+}
+
+.layer-frame-title-txt{
+	padding-left: 15px;
 }
 
 .layer-frame-title-btn{
@@ -38,8 +45,60 @@ html{
 	right: 10px;
 	top:0;
 	height: 100%;
+
+	overflow:visible; /*解决IE6/7下脱离文档流的button占满最近的已定位祖先元素宽度的bug*/
 }
 
 .layer-frame-title-btn:hover{
 	color:#2E2E2E;
+}
+
+.layer-frame-btns-wrapper{
+	position: absolute;
+	bottom: 0;
+	height: 60px;
+	line-height: 60px;
+	width: 100%;
+	border-top: 1px solid #ddd; 
+	text-align: center;
+
+}
+
+.layer-frame-btn{
+	outline: none;
+	border: none;
+	padding: 10px 35px; /*这里不用rem，桌面端浏览器从IE9才开始支持rem；rem在移动端用的较多*/
+	color: #fff;
+	cursor: pointer;
+	background: #337ab7;
+	transition: 0.5s background;
+	border-radius: 6px;
+	
+	line-height:normal; /*解决IE中button高度占满整个父容器的bug，其实CSS中line-height的默认值
+							就为normal，但IE中要明确指出*/
+	
+	margin-top:10px; /*虽然不太严谨，但不失为解决IE7下line-height无法实现垂直居中的一种方案*/
+}
+
+.layer-frame-btn:hover{
+	background: #286090;
+}
+
+/* .layer-frame-btns-wrapper button:not(:last-child){ IE8及更早版本不支持not和last-child
+	margin-right: 5rem;
+} */
+
+.okBtn{ 
+	margin-right: 100px;
+}
+
+.layer-frame-content{
+	height: 172px;
+	padding: 15px;
+
+	/*IE 6 - IE9 不支持user-select，这部分用JavaScript代码解决*/
+	-webkit-user-select: none;  /* Chrome / Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;    
 }

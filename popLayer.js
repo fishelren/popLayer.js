@@ -77,7 +77,10 @@
 
 		var defaultConfigSetting={ //默认配置项
 			"data-flag":true,  //默认支持拖拽
-			title:"" //标题栏文本
+			title:"", //标题栏文本
+			content:"",
+			okFunc:null, //“确定”响应函数
+			cancelFunc:null //“取消”响应函数
 		};
 
 		for(var attrName in defaultSetting){
@@ -151,6 +154,15 @@
 			
 			var e=EventUtil.getEvent(event); //确保能够跨浏览器获得事件对象
 
+			/* 
+				阻止鼠标移动时的默认行为，解决了Chrome和Opera上由于拖拽
+				触发了浏览器的drag操作，从而导致mouseup事件丢失的bug
+
+				mousedown和mousemove事件组合使用时本身就带有拖拽(drag)和选择(selection)的默认操作,
+				同时发生时（拖拽选中的内容）就会造成mouseup事件的丢失
+			*/
+			EventUtil.preventDefault(e);
+			
 			if(dragObj.getAttribute("data-flag") && param.flag){
 
 				//鼠标拖拽过程中的实时位置
@@ -183,7 +195,13 @@
 		});
 	}
 
-	popLayer.prototype.open=function(content,options,config){
+	function destroyElemFromBody(elem,parent){ //从父元素parent上移除子元素elem，并销毁
+		elem.style.visibility="hidden";
+		parent.removeChild(elem);
+		elem=null; //销毁
+	}
+
+	popLayer.prototype.open=function(options,config){
 
 		var setting={}; //接收自定义样式
 		var configSetting={}; //接收自定义配置
@@ -205,22 +223,53 @@
 		frameCloseBtnLogo.appendChild(frameCloseBtnLogoTxt);
 		frameCloseBtn.appendChild(frameCloseBtnLogo);
 		EventUtil.addHandler(frameCloseBtn,"click",function(){
-			frame.style.visibility="hidden";
-			body.removeChild(frame);
-			frame=null; //销毁
+			
+			destroyElemFromBody(frame,body);
 		});
 
 		frameTitle.appendChild(frameCloseBtn);
 
 		var frameTitleTxt=document.createElement("span");
+		frameTitleTxt.className="layer-frame-title-txt";
 		frameTitle.appendChild(frameTitleTxt);
+		
 		//解决IE6-9不支持user-select样式的问题
 		frameTitle.onselectstart = function(){ return false; }
-
+		
 		frame.appendChild(frameTitle);
 
+		/***************************************/
+
+		/***********弹出层按钮部分**************/
+		var frameBtnsWrapper=document.createElement("div");
+		frameBtnsWrapper.className="layer-frame-btns-wrapper";
+
+		var okBtn=document.createElement("button");
+		var okBtnTxt=document.createTextNode("确定");
+		okBtn.className="layer-frame-btn okBtn";
+		okBtn.appendChild(okBtnTxt);
+
+		var cancelBtn=document.createElement("button");
+		var cancelBtnTxt=document.createTextNode("取消");
+		cancelBtn.className="layer-frame-btn";
+		cancelBtn.appendChild(cancelBtnTxt);
+
+		frameBtnsWrapper.appendChild(okBtn);
+		frameBtnsWrapper.appendChild(cancelBtn);
+
+		frame.appendChild(frameBtnsWrapper);
+		
 		/*************************/
 
+		/**************弹出层内容区域****************/
+		var frameContent=document.createElement("div");
+		frameContent.className="layer-frame-content";
+
+		//解决IE6-9不支持user-select样式的问题
+		frameContent.onselectstart = function(){ return false; }
+
+		frame.appendChild(frameContent);
+		/*************************/
 
 		for(var attrName in options){
 
@@ -249,10 +298,45 @@
 		}
 
 		for(var configName in configSetting){
-			if(configName!="title"){
-				frame.setAttribute(configName,configSetting[configName]);
-			}else{
+			
+			if(configName==="title"){
 				frameTitleTxt.innerHTML=configSetting[configName]; //设置标题文字
+			}else if(configName==="content"){
+				frameContent.innerHTML=configSetting[configName];
+			}else if(configName==="okFunc"){
+
+				if(configSetting[configName]!=null){
+
+					EventUtil.addHandler(okBtn,"click",function(){
+						
+						destroyElemFromBody(frame,body);
+						configSetting.okFunc.apply(window);//configSetting[configName]在此处会变成boolean类型的true，很奇怪
+					});
+
+				}else{
+					EventUtil.addHandler(okBtn,"click",function(){
+						
+						destroyElemFromBody(frame,body);
+					});
+					
+				}
+				
+			}else if(configName==="cancelFunc"){
+
+				if(configSetting[configName]!=null){
+					EventUtil.addHandler(cancelBtn,"click",function(args){ //args为自定义的参数数组，有别于隐式存在的arguments类数组对象
+
+						destroyElemFromBody(frame,body);
+						configSetting.cancelFunc.apply(window); //在全局作用域中执行这个函数
+					});
+				}else{
+					EventUtil.addHandler(cancelBtn,"click",function(){
+						
+						destroyElemFromBody(frame,body);
+					});
+				}
+			}else{
+				frame.setAttribute(configName,configSetting[configName]);
 			}
 			
 		}
